@@ -1,9 +1,5 @@
 # https://vk.com/public194790108
 
-from dispatcher import cities_for_view
-
-
-
 INTENTS = [
     {
         'name': 'Cпасибо',
@@ -31,7 +27,7 @@ SCENARIOS = {
         'steps': {
             'step1': {
                 'text': 'Введите город отправления',
-                'failure_text': f'Во введенном городе ошибка. Возможные города \n{cities_for_view}',
+                'failure_text': f'Во введенном городе ошибка. Возможные города \n',
                 'handler': 'handler_city_from',
                 'next_step': 'step2'
             },
