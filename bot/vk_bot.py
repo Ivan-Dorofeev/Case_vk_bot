@@ -3,6 +3,7 @@ import random
 
 import Settings_dafault
 import vk_api
+from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 try:
@@ -23,7 +24,7 @@ class Bot:
         self.vk = vk_api.VkApi(token=self.token)
         self.long_poller = VkBotLongPoll(vk=self.vk, group_id=self.group_id)
         self.api = self.vk.get_api()
-        self.user_states = dict()  # user_id -> UserState
+        self.keyboard = VkKeyboard()
 
     def run(self):
         """Запуск Бота"""
@@ -31,7 +32,7 @@ class Bot:
             try:
                 self.on_event(event)
             except Exception:
-                print('ошибка в обработке события', event.type)
+                print('Ошибка в обработке события', event.type)
 
     def on_event(self, event):
         """
@@ -42,27 +43,16 @@ class Bot:
         if event.type.value == 'message_new':
             print(event.message.from_id, 'Сообщение: ', event.message.text)
             user_id = event.message.peer_id
-            self.api.message.send(
-                message='Выбери с клавиататуры',
+            text_to_send = 'Выбери с клавиатуры'
+            self.keyboard.add_button(label='Разделы', color=VkKeyboardColor.POSITIVE)
+            self.api.messages.send(
+                message=text_to_send,
                 random_id=random.randint(0, 2 ** 20),
                 peer_id=user_id,
-                keyboard={
-                    "type": "message_new",
-                    "object": {
-                        "id": 41,
-                        "date": 1526898082,
-                        "out": 0,
-                        "user_id": 163176673,
-                        "read_state": 0,
-                        "title": "",
-                        "body": "Blue",
-                        "payload": "{\"button\":\"4\"}"
-                    },
-                    "group_id": 194790108
-                }
+                keyboard=self.keyboard.get_keyboard(),
             )
-        elif event.type.value == 'message_typing_state':
-            print(event.object.from_id, 'печатает')
+        elif event.type.value in ['message_typing_state', 'message_reply']:
+            print(event.object.from_id, 'печатает/отвечает')
         else:
             print("Не умеем обрабатывать такое событие такого типа %s", event.type)
 
