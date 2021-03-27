@@ -25,20 +25,23 @@ class Bot:
             except Exception:
                 print('Ошибка в обработке события', event.type)
 
-    def prepare_keyboard(self):
+    def prepare_keyboard(self, key_input):
         """Подготавливаем клавиатуру"""
-        print('get_keyboard1 =',self.keyboard.get_keyboard())
-        self.keyboard.add_button(label='Разделы', color=VkKeyboardColor.POSITIVE)
-        self.keyboard.add_button(label='Товары', color=VkKeyboardColor.POSITIVE)
-        self.keyboard.add_button(label='Корзина', color=VkKeyboardColor.POSITIVE)
-        print('get_keyboard2 =', self.keyboard.get_keyboard())
+        if key_input not in ['Разделы', 'Товары', 'Корзина']:
+            pass
+        else:
+            print('get_keyboard1 =', self.keyboard.get_keyboard())
+            self.keyboard.add_button(label='Разделы', color=VkKeyboardColor.POSITIVE)
+            self.keyboard.add_button(label='Товары', color=VkKeyboardColor.POSITIVE)
+            self.keyboard.add_button(label='Корзина', color=VkKeyboardColor.POSITIVE)
+            print('get_keyboard2 =', self.keyboard.get_keyboard())
         return self.keyboard
 
     def on_event(self, event):
         """Обрабатываем событие"""
         if event.type.value == 'message_new':
             print(event.message.from_id, 'Сообщение: ', event.message.text)
-            self.prepare_keyboard()
+            self.prepare_keyboard(key_input=event.message.text)
             self.api.messages.send(
                 message='',
                 random_id=random.randint(0, 2 ** 20),
