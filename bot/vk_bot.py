@@ -16,6 +16,7 @@ class Bot:
         self.api = self.vk.get_api()
         self.keyboard = VkKeyboard()
         self.buttons = ['Разделы', 'Товары', 'Корзина']
+        self.event = None
 
     def run(self):
         """Запуск Бота"""
@@ -25,29 +26,69 @@ class Bot:
             except Exception:
                 print('Ошибка в обработке события', event.type)
 
+    def scenario(self, input_word):
+        print(self.event.object)
+        if input_word == 'Разделы':
+            print(self.keyboard)
+            # self.send_empty_message()
+            self.keyboard.add_button(label='Назад', color=VkKeyboardColor.PRIMARY)
+            self.keyboard.add_line()
+            self.keyboard.add_button(label='Спортивная', color=VkKeyboardColor.PRIMARY)
+            self.keyboard.add_button(label='Повседневная', color=VkKeyboardColor.PRIMARY)
+            self.keyboard.add_button(label='Хардкор', color=VkKeyboardColor.PRIMARY)
+            print(self.keyboard.get_keyboard())
+        elif input_word == 'Товары':
+            # self.keyboard.add_line()
+            # self.keyboard.add_button(label='Назад', color=VkKeyboardColor.PRIMARY)
+            # self.keyboard.add_button(label='Положить в корзину', color=VkKeyboardColor.PRIMARY)
+            self.send_empty_message()
+        elif input_word == 'Корзина':
+            # self.send_empty_message()
+            # self.keyboard.get_empty_keyboard()
+            self.keyboard.add_line()
+            self.keyboard.add_button(label='Назад', color=VkKeyboardColor.PRIMARY)
+            self.keyboard.add_button(label='Купить всё, что в корзине', color=VkKeyboardColor.NEGATIVE)
+            print(self.keyboard.get_keyboard())
+
+    def send_empty_message(self):
+        self.api.messages.send(
+            message='Тут я ещё не придумал, как быть',
+            random_id=random.randint(0, 2 ** 20),
+            peer_id=self.event.message.peer_id,
+            keyboard=self.keyboard.get_empty_keyboard(),
+        )
+
+    def send_message(self):
+        self.api.messages.send(
+            message='Выберите что-нибудь из разделов ниже',
+            random_id=random.randint(0, 2 ** 20),
+            peer_id=self.event.message.peer_id,
+            keyboard=self.keyboard.get_keyboard(),
+        )
+        print(self.api.messages)
+
     def prepare_keyboard(self, key_input):
-        """Подготавливаем клавиатуру"""
-        if key_input not in ['Разделы', 'Товары', 'Корзина']:
-            pass
+        """Подготавливаем клавиатуру и отправляем ответ"""
+        if str(key_input).capitalize() in ['Разделы', 'Товары', 'Корзина']:
+            self.scenario(input_word=str(key_input).capitalize())
+            self.send_message()
         else:
-            print('get_keyboard1 =', self.keyboard.get_keyboard())
             self.keyboard.add_button(label='Разделы', color=VkKeyboardColor.POSITIVE)
             self.keyboard.add_button(label='Товары', color=VkKeyboardColor.POSITIVE)
             self.keyboard.add_button(label='Корзина', color=VkKeyboardColor.POSITIVE)
-            print('get_keyboard2 =', self.keyboard.get_keyboard())
-        return self.keyboard
+            self.api.messages.send(
+                message='Выберите что-нибудь из разделов ниже',
+                random_id=random.randint(0, 2 ** 20),
+                peer_id=self.event.message.peer_id,
+                keyboard=self.keyboard.get_keyboard(),
+            )
 
     def on_event(self, event):
         """Обрабатываем событие"""
         if event.type.value == 'message_new':
+            self.event = event
             print(event.message.from_id, 'Сообщение: ', event.message.text)
             self.prepare_keyboard(key_input=event.message.text)
-            self.api.messages.send(
-                message='',
-                random_id=random.randint(0, 2 ** 20),
-                peer_id=event.message.peer_id,
-                keyboard=self.keyboard.get_keyboard(),
-            )
 
 
 if __name__ == '__main__':
