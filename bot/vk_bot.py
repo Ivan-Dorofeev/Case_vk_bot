@@ -73,9 +73,9 @@ class Bot:
             self.scenario(input_word=str(key_input).capitalize())
             self.send_message()
         else:
-            self.keyboard.add_button(label='Разделы', color=VkKeyboardColor.POSITIVE)
-            self.keyboard.add_button(label='Товары', color=VkKeyboardColor.POSITIVE)
-            self.keyboard.add_button(label='Корзина', color=VkKeyboardColor.POSITIVE)
+            self.keyboard = self.keyboard.get_empty_keyboard()
+            for button in self.buttons:
+                self.keyboard.add_button(label=button, color=VkKeyboardColor.POSITIVE)
             self.api.messages.send(
                 message='Выберите что-нибудь из разделов ниже',
                 random_id=random.randint(0, 2 ** 20),
