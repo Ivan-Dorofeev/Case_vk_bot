@@ -93,7 +93,7 @@ DEFAULT_ANSWER = 'Не знаю как на это ответить. ' \
                  'Я могу зарегистрировать Вас на рейс. Напишите "/ticket" \n'
 
 DB_CONFIG = dict(
-    provider='postgres',
+    provider='mysql',
     user='',
     password='',
     host='',
