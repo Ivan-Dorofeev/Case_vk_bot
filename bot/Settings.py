@@ -92,14 +92,6 @@ SCENARIOS = {
 DEFAULT_ANSWER = 'Не знаю как на это ответить. ' \
                  'Я могу зарегистрировать Вас на рейс. Напишите "/ticket" \n'
 
-# DB_CONFIG = dict(
-#     provider='mysql',
-#     user='',
-#     password='',
-#     host='',
-#     database='vk_bot',
-# )
-
 DB_CONFIG = dict(
     provider='sqlite',
     filename='database.sqlite',
