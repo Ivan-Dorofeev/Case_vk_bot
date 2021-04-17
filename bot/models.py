@@ -1,3 +1,5 @@
+import os
+
 from pony.orm import Database, Required, Json, select, db_session, desc
 
 from Settings import DB_CONFIG
@@ -17,6 +19,7 @@ class Products(db.Entity):
     name = Required(str)
     description = Required(str)
     category = Required(str)
+    picture = Required(str)
     price = Required(int)
     counts = Required(int)
 
@@ -30,7 +33,9 @@ def write_to_db():
     for i in range(0, 3):
         count += 1
         name_count = 'Название ' + str(count)
-        Products(name=name_count, category='По бездорожью', price=5200, counts=10)
+        Products(name=name_count, description='Крутая обувь для повседневной деятельности', category='Повседневная',
+                 picture=f'/stocks/pictures/product_category/daily/{count}.jpg',
+                 price=2500, counts=10)
 
 
 @db_session
@@ -63,4 +68,3 @@ if __name__ == "__main__":
     # get_products_by_type(shoes_type='Повседневная')
     # get_products()
     # change_counts('Название 10')
-

@@ -1,5 +1,6 @@
 import random
 
+import requests
 import vk_api
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
@@ -54,7 +55,14 @@ class Bot:
             self.keyboard.add_button(label=main_buttons, color=VkKeyboardColor.PRIMARY)
         if self.step > 1:
             product_list = get_products_by_type(shoes_type=str(key_input).capitalize())
-            self.message = steps[self.step]['message'] + '/n' + product_list
+            self.message = steps[self.step]['message'] + ' /n' + product_list
+            self.api.messages.send(
+                message=self.message,
+                random_id=random.randint(0, 2 ** 20),
+                peer_id=self.event.message.peer_id,
+                keyboard=self.keyboard.get_keyboard(),
+            )
+            self.send_image()
         else:
             self.message = steps[self.step]['message']
         self.api.messages.send(
@@ -62,6 +70,20 @@ class Bot:
             random_id=random.randint(0, 2 ** 20),
             peer_id=self.event.message.peer_id,
             keyboard=self.keyboard.get_keyboard(),
+        )
+
+    def send_image(self, image, user_id):
+        upload_url = self.api.photos.getMessagesUploadServer()['upload_url']
+        upload_data = requests.post(url=upload_url, files={'photo': ('image.png', image, 'image/png')}).json()
+        image_data = self.api.photos.saveMessagesPhoto(**upload_data)
+        owner_id = image_data[0]['owner_id']
+        media_id = image_data[0]['id']
+        attachment = f'photo{owner_id}_{media_id}'
+
+        self.api.messages.send(
+            attachment=attachment,
+            random_id=random.randint(0, 2 ** 20),
+            peer_id=user_id
         )
 
     def on_event(self, event):
