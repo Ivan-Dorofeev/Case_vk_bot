@@ -1,14 +1,12 @@
 import random
 
-from pony.orm import db_session, select
-
-import Settings_dafault
 import vk_api
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
-from bot.models import Products
 from keyboard import steps
+import Settings_dafault
+from models import *
 
 
 class Bot:
@@ -48,24 +46,23 @@ class Bot:
                 keyboard=self.keyboard.get_keyboard(),
             )
 
+    @db_session
     def prepare_keyboard_message(self, key_input):
         """Подготавливаем клавиатуру и сообщение"""
         self.keyboard = VkKeyboard()
         for main_buttons in steps[self.step]['buttons']:
             self.keyboard.add_button(label=main_buttons, color=VkKeyboardColor.PRIMARY)
-        self.message = steps[self.step]['message']
+        if self.step > 1:
+            product_list = get_products_by_type(shoes_type=str(key_input).capitalize())
+            self.message = steps[self.step]['message'] + '/n' + product_list
+        else:
+            self.message = steps[self.step]['message']
         self.api.messages.send(
             message=self.message,
             random_id=random.randint(0, 2 ** 20),
             peer_id=self.event.message.peer_id,
             keyboard=self.keyboard.get_keyboard(),
         )
-
-    @db_session
-    def database(self):
-        """записываем и берём информацию из базы"""
-        products_5 = select(p for p in Products.name if Products.id < 6)
-        return products_5
 
     def on_event(self, event):
         """Обрабатываем событие"""
