@@ -22,6 +22,7 @@ class Bot:
         self.message = str
         self.step = 0
         self.event = None
+        self.user_id = None
 
     def run(self):
         """Запуск Бота"""
@@ -54,15 +55,18 @@ class Bot:
         for main_buttons in steps[self.step]['buttons']:
             self.keyboard.add_button(label=main_buttons, color=VkKeyboardColor.PRIMARY)
         if self.step > 1:
-            product_list = get_products_by_type(shoes_type=str(key_input).capitalize())
-            self.message = steps[self.step]['message'] + ' /n' + product_list
+            self.message = steps[self.step]['message']
             self.api.messages.send(
                 message=self.message,
                 random_id=random.randint(0, 2 ** 20),
                 peer_id=self.event.message.peer_id,
                 keyboard=self.keyboard.get_keyboard(),
             )
-            self.send_image()
+            product_list = get_products_by_type(shoes_type=str(key_input).capitalize())
+            for product_name in product_list:
+                image = get_products_picture(product_name.name)
+                self.send_image(image, user_id=self.user_id, product_name=product_name.name)
+                # Продолжить!!!!!!!!!!!!
         else:
             self.message = steps[self.step]['message']
         self.api.messages.send(
@@ -72,15 +76,15 @@ class Bot:
             keyboard=self.keyboard.get_keyboard(),
         )
 
-    def send_image(self, image, user_id):
+    def send_image(self, image, user_id, product_name):
         upload_url = self.api.photos.getMessagesUploadServer()['upload_url']
         upload_data = requests.post(url=upload_url, files={'photo': ('image.png', image, 'image/png')}).json()
         image_data = self.api.photos.saveMessagesPhoto(**upload_data)
         owner_id = image_data[0]['owner_id']
         media_id = image_data[0]['id']
         attachment = f'photo{owner_id}_{media_id}'
-
         self.api.messages.send(
+            message=product_name,
             attachment=attachment,
             random_id=random.randint(0, 2 ** 20),
             peer_id=user_id

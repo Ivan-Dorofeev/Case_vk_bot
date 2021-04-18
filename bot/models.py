@@ -63,6 +63,13 @@ def get_products_by_type(shoes_type):
     return res
 
 
+@db_session
+def get_products_picture(product_number):
+    product = Products.select(lambda p: p.name == product_number)
+    product_picture = product.picture
+    return product_picture
+
+
 if __name__ == "__main__":
     write_to_db()
     # get_products_by_type(shoes_type='Повседневная')
