@@ -41,37 +41,36 @@ class Bot:
             self.prepare_keyboard_message(key_input)
         else:
             self.prepare_keyboard_message(key_input)
-            self.api.messages.send(
-                message='Нажмите на кнопку',
-                random_id=random.randint(0, 2 ** 20),
-                peer_id=self.event.message.peer_id,
-                keyboard=self.keyboard.get_keyboard(),
-            )
 
-    @db_session
     def prepare_keyboard_message(self, key_input):
         """Подготавливаем клавиатуру и сообщение"""
         self.keyboard = VkKeyboard()
         for main_buttons in steps[self.step]['buttons']:
             self.keyboard.add_button(label=main_buttons, color=VkKeyboardColor.PRIMARY)
         if self.step > 1:
-            self.message = steps[self.step]['message']
-            self.api.messages.send(
-                message=self.message,
-                random_id=random.randint(0, 2 ** 20),
-                peer_id=self.event.message.peer_id,
-                keyboard=self.keyboard.get_keyboard(),
-            )
             product_list = get_products_by_type(shoes_type=str(key_input).capitalize())
             for product_name in product_list:
-                image = get_products_picture(product_name.name)
-                self.send_image(image, user_id=self.user_id, product_name=product_name.name)
-                # Продолжить!!!!!!!!!!!!
+                p_id = product_name[0]
+                p_name = product_name[1]
+                p_description = product_name[2]
+                p_counts = product_name[3]
+                p_price = product_name[4]
+                p_pictures = product_name[5]
+                self.message = f'#{p_id} /n ,{p_name}, Описание: {p_description}, Цена: {p_price}, В наличии: {p_counts}'
+                self.send_message()
+                self.send_image(p_pictures, user_id=self.user_id, product_name=p_name)
+            self.keyboard = VkKeyboard()
+            for p_button in product_list:
+                self.keyboard.add_button(label=p_button[1], color=VkKeyboardColor.PRIMARY)
+            self.message = "Выберите название товара, чтобы положить в корзину"
         else:
             self.message = steps[self.step]['message']
-        self.api.messages.send(
+        self.send_message()
+
+    def send_message(self):
+        self.api.message.send(
             message=self.message,
-            random_id=random.randint(0, 2 ** 20),
+            random_id=random.randint(0, 3 ** 20),
             peer_id=self.event.message.peer_id,
             keyboard=self.keyboard.get_keyboard(),
         )
@@ -90,6 +89,7 @@ class Bot:
             peer_id=user_id
         )
 
+    @db_session
     def on_event(self, event):
         """Обрабатываем событие"""
         if event.type.value == 'message_new':

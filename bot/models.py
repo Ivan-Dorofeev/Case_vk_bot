@@ -51,15 +51,15 @@ def change_counts(name_product):
 @db_session
 def get_products_no_null():
     res = list(Products.select(lambda p: p.counts > 0))
-    print(res)
+    print('get_products_no_null = ', res)
     return res
 
 
 @db_session
 def get_products_by_type(shoes_type):
-    products_by_type = list(Products.select(lambda p: p.category == shoes_type).order_by(Products.name))
-    res = [p.name for p in products_by_type]
-    print(res)
+    products_by_type = list(Products.select(lambda p: p.category == shoes_type and p.counts > 0).order_by(Products.id))
+    res = [(p.id, p.name, p.description, p.counts, p.price, p.picture) for p in products_by_type]
+    print('get_products_by_type = ', res)
     return res
 
 
@@ -67,11 +67,12 @@ def get_products_by_type(shoes_type):
 def get_products_picture(product_number):
     product = Products.select(lambda p: p.name == product_number)
     product_picture = product.picture
+    print('get_products_picture = ', product_picture)
     return product_picture
 
-
-if __name__ == "__main__":
-    write_to_db()
-    # get_products_by_type(shoes_type='Повседневная')
-    # get_products()
-    # change_counts('Название 10')
+#
+# if __name__ == "__main__":
+#     write_to_db()
+# get_products_by_type(shoes_type='Повседневная')
+# get_products()
+# change_counts('Название 10')
